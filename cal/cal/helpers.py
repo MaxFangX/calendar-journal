@@ -22,27 +22,27 @@ class EventCollection:
     def get_events(self):
         return self._events_func()
     
-    def intersection(self, other):
-
+    def intersection(self, other, start, end):
+        # not used
         def lazy_get_events():
-            return set.intersection(self.get_events(), other.get_events())
+            return set.intersection(self.get_events(start, end), other.get_events(start, end))
 
         ec = EventCollection(events_func=lazy_get_events, name="({} intersection {})".format(self, other))
 
         return ec
 
     def union(self, other):
-
+        # not used
         def lazy_get_events():
-            return set.union(self.get_events(), other.get_events())
+            return set.union(self.get_events(start, end), other.get_events(start, end))
 
         ec = EventCollection(events_func=lazy_get_events, name="({} union {})".format(self, other))
 
         return ec
 
-    def total_time(self, calendar=None):
+    def total_time(self, start, end, calendar=None):
 
-        events = self.get_events()
+        events = self.get_events(start, end)
 
         total = datetime.timedelta()
         for e in events:
