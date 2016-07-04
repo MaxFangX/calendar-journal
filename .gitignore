@@ -10,3 +10,5 @@
 
 # Hide environment variables 
 .ebextensions/02-cal.config
+.fishrc
+.bashrc
