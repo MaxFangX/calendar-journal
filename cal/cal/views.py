@@ -23,8 +23,9 @@ def home(request):
     context = RequestContext(request)
 
     if request.user.is_authenticated():
-        start = now = date.today()
-        end = one_week_ago = now - timedelta(days=7)
+        now = date.today()
+        start = now - timedelta(days=now.weekday()) + timedelta(days=6, weeks=-1)
+        end = one_week_ago = now + timedelta(days=7)
 
         color_categories = [{
             'label': c.label,

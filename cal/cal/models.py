@@ -160,9 +160,10 @@ class Tag(models.Model, EventCollection):
         querysets = set()
         for kw in keywords:
             # TODO extend this be able to search in note as well
-            qs = GEvent.objects.filter(calendar=calendar, name__icontains=kw)
-            qs = qs.filter(start__range=(start, end), end__range=(start, end))
-            print(qs)
+            qs = GEvent.objects.filter(calendar=calendar,
+                                       name__icontains=kw,
+                                       start__gte=start,
+                                       end__lte=end)
             querysets.add(qs)
 
         # Union over the querysets
