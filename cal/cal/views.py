@@ -1,6 +1,8 @@
 from cal.helpers import json_response, TimeNodeChain
 from cal.models import ColorCategory, GoogleCredentials, GoogleFlow, Profile, Tag
 
+from datetime import date, datetime, timedelta
+
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -21,6 +23,10 @@ def home(request):
     context = RequestContext(request)
 
     if request.user.is_authenticated():
+        now = date.today()
+        start = now - timedelta(days=now.weekday()) + timedelta(days=6, weeks=-1)
+        end = one_week_ago = now + timedelta(days=7)
+
         color_categories = [{
             'label': c.label,
             'hours': TimeNodeChain(c.get_last_week()).total_time / 3600 }
@@ -28,7 +34,7 @@ def home(request):
         context['color_categories'] = color_categories
         tags = [{
             'label': t.label,
-            'hours': t.total_time() / 3600,
+            'hours': t.total_time(start, end) / 3600,
             }
             for t in Tag.objects.filter(user=request.user).order_by('label')]
         context['tags'] = tags

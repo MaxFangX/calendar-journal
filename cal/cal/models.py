@@ -69,37 +69,41 @@ class ColorCategory(models.Model, EventCollection):
     def __str__(self):
         return "{} by {}".format(self.label, self.user.username)
 
-    def get_events(self, calendar=None):
+    def get_events(self, start, end, calendar=None):
+        """
+        Returns all the events from a specific start to end date.
+        """
         if not calendar:
             calendar = self.user.profile.main_calendar
 
         qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
+        qs = qs.filter(start__range=(start, end), end__range=(start, end))
         return set(qs)
 
-    def get_last_week(self, calendar=None):
-        """
-        Returns the last week's worth of GEvents in a calendar
-        """
-        if not calendar:
-            calendar = self.user.profile.main_calendar
+    # def get_last_week(self, calendar=None):
+    #     """
+    #     Returns the last week's worth of GEvents in a calendar
+    #     """
+    #     if not calendar:
+    #         calendar = self.user.profile.main_calendar
 
-        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-        now = date.today()
-        one_week_ago = now - timedelta(days=7)
-        qs = qs.filter(start__range=(one_week_ago, now), end__range=(one_week_ago, now))
-        qs = qs.order_by('updated')
-        return qs
+    #     qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
+    #     now = date.today()
+    #     one_week_ago = now - timedelta(days=7)
+    #     qs = qs.filter(start__range=(one_week_ago, now), end__range=(one_week_ago, now))
+    #     qs = qs.order_by('updated')
+    #     return qs
 
-    def get_last_month(self, calendar=None):
-        if not calendar:
-            calendar = self.user.profile.main_calendar
+    # def get_last_month(self, calendar=None):
+    #     if not calendar:
+    #         calendar = self.user.profile.main_calendar
 
-        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-        now = date.today()
-        one_month_ago = now - timedelta(days=28)  # 28 days to maintain consistency between weeks
-        qs = qs.filter(start__range=(one_month_ago, now), end__range=(one_month_ago, now))
-        qs = qs.order_by('updated')
-        return qs
+    #     qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
+    #     now = date.today()
+    #     one_month_ago = now - timedelta(days=28)  # 28 days to maintain consistency between weeks
+    #     qs = qs.filter(start__range=(one_month_ago, now), end__range=(one_month_ago, now))
+    #     qs = qs.order_by('updated')
+    #     return qs
 
 
 class TagGroup(models.Model):
@@ -119,7 +123,10 @@ class Tag(models.Model, EventCollection):
 
     @property
     def hours(self):
-        return self.total_time() / 3600
+        # in the past week for now
+        start = now = date.today()
+        end = one_week_ago = now - timedelta(days=7)
+        return self.total_time(start, end) / 3600
 
     def save(self, *args, **kwargs):
         # Remove beginning and ending spaces
@@ -127,12 +134,12 @@ class Tag(models.Model, EventCollection):
 
         return super(Tag, self).save(*args, **kwargs)
 
-    def get_events(self, calendar=None):
-        return set(self.query(calendar))
+    def get_events(self, start, end, calendar=None):
+        return set(self.query(start, end, calendar))
 
-    def query(self, calendar=None):
+    def query(self, start, end, calendar=None):
         """
-        Returns a QuerySet of events matching this Tag
+        Returns a QuerySet of events from a specific start and end date matching this Tag
         """
         if calendar:
             # Check that this calendar belongs to the User
@@ -153,7 +160,10 @@ class Tag(models.Model, EventCollection):
         querysets = set()
         for kw in keywords:
             # TODO extend this be able to search in note as well
-            qs = GEvent.objects.filter(calendar=calendar, name__icontains=kw)
+            qs = GEvent.objects.filter(calendar=calendar,
+                                       name__icontains=kw,
+                                       start__gte=start,
+                                       end__lte=end)
             querysets.add(qs)
 
         # Union over the querysets
