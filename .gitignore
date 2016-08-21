@@ -5,13 +5,14 @@
 
 # Bower
 cal/cal/static/bower_components/*
+cal/bower_components/*
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
-# Hide environment variables 
+# Hide environment variables
 .ebextensions/02-cal.config
 
 # Any .rc
