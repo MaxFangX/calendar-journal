@@ -15,3 +15,9 @@ cal/cal/static/bower_components/*
 .ebextensions/02-cal.config
 .fishrc
 .bashrc
+
+# DS Store
+.DS_Store
+
+# NPM Log
+cal/cal/npm-debug.log

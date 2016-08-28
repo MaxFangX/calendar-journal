@@ -13,12 +13,27 @@ h1, h2, h3, h4, h5, h6, a, p {
   color: #000; }
 
 .cal-category-list {
+  /*float: right;*/
+  margin-left: 1%;
+  margin-top: 1%; }
+
+.cal-tag-list {
+  /*float: right;*/
   margin-left: 1%;
   margin-top: 1%; }
 
 .cal-home-logged-in .cal-calendar {
-  padding-left: 10%;
-  padding-right: 10%; }
+  /*background-color: black;*/
+  padding: 3% 3% 5% 3%; }
+
+.calendar {
+  /*float: left;*/
+  /*width: 50%;*/
+}
+
+button {
+  margin: 2px;
+}
 
 .cal-home-logged-out {
   height: 100%;
