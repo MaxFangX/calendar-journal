@@ -13,12 +13,10 @@ h1, h2, h3, h4, h5, h6, a, p {
   color: #000; }
 
 .cal-category-list {
-  /*float: right;*/
   margin-left: 1%;
   margin-top: 1%; }
 
 .cal-tag-list {
-  /*float: right;*/
   margin-left: 1%;
   margin-top: 1%; }
 
@@ -26,13 +24,12 @@ h1, h2, h3, h4, h5, h6, a, p {
   /*background-color: black;*/
   padding: 3% 3% 5% 3%; }
 
-.calendar {
-  /*float: left;*/
-  /*width: 50%;*/
-}
-
 button {
-  margin: 2px;
+  margin: 2px; }
+
+.btn-group {
+  float: right;
+  margin: -5px 0 5px 5px;
 }
 
 .cal-home-logged-out {

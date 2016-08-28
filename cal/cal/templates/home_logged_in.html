@@ -30,6 +30,7 @@
 
 {% endblock %}
 
+<!-- Information when logged in -->
 {% block content %}
 <div ng-controller="LoggedInCtrl" class="cal-home-logged-in">
   <ul class="nav nav-tabs">
@@ -43,16 +44,14 @@
   {% if request.user.profile.authed %}
 
   <div ng-controller="CalendarCtrl as $ctrl" class="cal-calendar col-md-8">
-
-    <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div>
-    <!-- Disable/Enable calendars -->
+    <!-- Enable / disable calendars button -->
     <div class="btn-group">
       <button type="button"
         class="btn btn-default dropdown-toggle"
         data-toggle="dropdown"
         aria-haspopup="true"
         aria-expanded="false">
-        Enable / disable calendars
+        Select Calendars
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu">
@@ -64,23 +63,28 @@
         </li>
       </ul>
     </div>
+    <!-- Calendar -->
+    <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div>
   </div>
 
-
+  <!-- Lists and other info on the side -->
   <div class="col-md-4">
     {% include "_category_list.html"%}
   </div>
   <div class="col-md-4">
     {% include "_tag_list.html"%}
   </div>
+
+  <!-- For new users, needing to connect their calendars -->
   {% else %}
     <div class="jumbotron">
       <h3><a href="/auth/google">Connect Google Calendar</a></h3>
     </div>
   {% endif %}
 
-  {% if request.user.is_staff %}
+  <!-- Super user buttons -->
   <div class="col-md-4">
+  {% if request.user.is_staff %}
     <h4 class="well">Options</h4>
     {% verbatim %}
     <p>Test string: {{ testString }}</p>
@@ -91,7 +95,6 @@
     <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-left">Full Sync All Calendars</button></a>
     <a href="/auth/clear"><button class="btn btn-primary pull-left">Reset Credentials</button></a>
   {% endif %}
-  <br>
   </div>
 </div>
 {% endblock %}
