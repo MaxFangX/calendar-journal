@@ -98,7 +98,7 @@
             </th>
           </thead>
           <tbody>
-            <tr ng-repeat="tag in tags | orderBy:orderByField:reverseSort">
+            <tr ng-repeat="(id, tag) in tags">
               {% verbatim %}
               <td ng-hide="tag.editing">{{ tag.label }}</td>
               <td ng-hide="tag.editing">{{ tag.hours }}</td>
@@ -113,18 +113,18 @@
               </td>
               <td class="text-right text-nowrap" ng-show="tag.editing">
                 <button class="btn btn-success">
-                  <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submit(tag.id)"></span>
+                  <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submit(id)"></span>
                 </button>
                 <button class="btn btn-warning">
-                  <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(tag.id)"></span>
+                  <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(id)"></span>
                 </button>
               </td>
               <td class="text-right text-nowrap" ng-hide="tag.editing">
                 <button class="btn btn-info">
-                  <span class="glyphicon glyphicon-edit" ng-click="$ctrl.startEdit(tag.id)"></span>
+                  <span class="glyphicon glyphicon-edit" ng-click="$ctrl.startEdit(id)"></span>
                 </button>
                 <button class="btn btn-danger">
-                  <span class="glyphicon glyphicon-trash" ng-click="$ctrl.delete(tag.id)"></span>
+                  <span class="glyphicon glyphicon-trash" ng-click="$ctrl.delete(id)"></span>
                 </button>
               </td>
             </tr>
