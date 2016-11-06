@@ -5,7 +5,7 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 
 analyticsApp.controller('TagsCtrl', function($scope, $http){
   var tagUrl = '/v1/tags';
-  $scope.tags = [];
+  $scope.tags = {};
   $scope.orderByField = 'label';
   $scope.reverseSort = false;
 
@@ -14,12 +14,11 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
   success(function successCallback(data) {
     for (var i = 0; i < data.results.length; i++) {
       var tag = data.results[i];
-      $scope.tags.push({
-        id: tag.id,
+      $scope.tags[tag.id] = {
         label: tag.label,
         keywords: tag.keywords,
         hours: tag.hours
-      });
+      };
     }
   });
 
@@ -37,25 +36,24 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
       }
     }).
     success(function addToList(data) {
-      $scope.tags.push({
-        id: data.id,
+      $scope.tags[data.id] = {
         label: data.label,
         keywords: data.keywords,
         hours: data.hours,
         editing: false
-      });
+      };
     });
   };
 
   this.startEdit = function(tagId) {
-    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+    var tag = $scope.tags[tagId];
     tag.newLabel = tag.label;
     tag.newKeywords = tag.keywords;
     tag.editing = true;
   };
 
   this.submit = function(tagId) {
-    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+    var tag = $scope.tags[tagId];
     tag.editing = false;
 
     $http({
@@ -79,7 +77,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
   };
 
   this.cancelEdit = function(tagId) {
-    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+    var tag = $scope.tags[tagId];
     tag.editing = false;
   };
 
@@ -96,9 +94,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
       }
     }).
     success(function removeFromList(data) {
-      $scope.tags = $scope.tags.filter(function(tag) {
-        return tag.id !== tagId;
-      });
+      delete $scope.tags[tagId];
     });
   };
 });
@@ -271,6 +267,6 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
       console.log("Could not save preferences for calendar " + calendarPrimaryKey);
     });
   };
-  
+
   this.eventSources = [this.events];
 });
