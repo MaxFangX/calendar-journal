@@ -259,7 +259,6 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       }
     }).
     success(function removeFromList(data) {
-      console.log($scope.categories.dataLoaded);
       $scope.categories = $scope.categories.filter(function(category) {
         return category.id !== categoryId;
       });
