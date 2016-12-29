@@ -246,6 +246,7 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
     success(function addToList(data) {
       category.label = data.label;
       category.hours = data.hours;
+      $scope.categories.dataLoaded = true;
     });
   };
 
@@ -274,6 +275,7 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       $scope.categories = $scope.categories.filter(function(category) {
         return category.id !== categoryId;
       });
+      $scope.categories.dataLoaded = true;
     });
   };
 
