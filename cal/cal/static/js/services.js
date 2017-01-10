@@ -91,11 +91,13 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
     });
   };
 
-  this.createTag = function(label, keywords) {
+  this.createTag = function(label, keywords, start, end) {
     return $http({
       method: 'POST',
       url: '/v1/tags.json',
       data: $.param({
+        start: start ? start.toISOString() : null,
+        end: end ? end.toISOString() : null,
         label: label,
         keywords: keywords,
         csrfmiddlewaretoken: getCookie('csrftoken')
@@ -106,11 +108,13 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
     });
   };
 
-  this.editTag = function(tagId, newLabel, newKeywords, filterKey) {
+  this.editTag = function(tagId, newLabel, newKeywords, start, end, filterKey) {
     return $http({
       method: 'POST',
       url: '/v1/tags/' + tagId,
       data: $.param({
+        start: start ? start.toISOString() : null,
+        end: end ? end.toISOString() : null,
         label: newLabel,
         keywords: newKeywords,
         csrfmiddlewaretoken: getCookie('csrftoken'),

@@ -52,7 +52,10 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
   };
 
   this.create = function(tag) {
-    TagService.createTag(tag.label, tag.keywords)
+    var filterData = CalendarFilterService.getFilter();
+    var start = this.isCumulative ? null : filterData.start;
+    var end = this.isCumulative ? null : filterData.end;
+    TagService.createTag(tag.label, tag.keywords, start, end)
       .success(function addToList(data) {
         _this.tags.push({
           id: data.id,
@@ -63,7 +66,7 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
         });
       _this.tags.dataLoaded = true;
       });
-  }.bind(this);
+  };
 
   this.startEdit = function(tagId) {
     var tag = this.tags.find(function(tag, index, array) {
@@ -76,19 +79,22 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
   };
 
   this.submitEdit = function(tagId) {
+    var filterData = CalendarFilterService.getFilter();
+    var start = this.isCumulative ? null : filterData.start;
+    var end = this.isCumulative ? null : filterData.end;
     var tag = this.tags.find(function(tag, index, array) {
       /* jshint unused:vars */
       return tag.id == tagId;
     });
     tag.editing = false;
     var filterData = CalendarFilterService.getFilter();
-    TagService.editTag(tagId, tag.newLabel, tag.newKeywords, filterData.filterKey)
+    TagService.editTag(tagId, tag.newLabel, tag.newKeywords, start, end, filterData.filterKey)
       .then(function(returnedTag) {
         tag.label = returnedTag.label;
         tag.keywords = returnedTag.keywords;
         tag.hours = returnedTag.hours;
       });
-  }.bind(this);
+  };
 
   this.cancelEdit = function(tagId) {
     var tag = this.tags.find(function(tag, index, array) {
