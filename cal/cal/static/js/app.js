@@ -359,7 +359,6 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
     CategoryService.editCategory(categoryId, category.newLabel)
       .then(function(returnedCategory) {
         category.label = returnedCategory.label;
-        category.hours = returnedCategory.hours;
         _this.categories.dataLoaded = true;
       });
   };
