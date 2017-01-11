@@ -48,12 +48,8 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   this.hideZeroHoursFilter = function (value, index, array) {
     /* jshint unused:vars */
-    if (this.hideZeroHours && value.hours === 0) {
-      return false;
-    } else {
-      return true;
-    }
-  }.bind(this);
+    return !(_this.hideZeroHours && values.hours === 0)
+  }
 
   this.create = function(tag) {
     TagService.createTag(tag.label, tag.keywords)
@@ -337,8 +333,8 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
 
   this.hideZeroHoursFilter = function(value, index, array) {
     /* jshint unused:vars */
-    return !this.hideZeroHours || value.hours !== 0
-  }.bind(this);
+    return !(_this.hideZeroHours && value.hours === 0);
+  }
 
   this.startEdit = function(categoryId) {
     var category = _this.categories.find(function(category, index, array) {
