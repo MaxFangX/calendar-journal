@@ -91,35 +91,41 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
     });
   };
 
-  this.createTag = function(label, keywords, start, end) {
+  this.createTag = function(label, keywords, start, end, calendarIds) {
     return $http({
       method: 'POST',
       url: '/v1/tags.json',
       data: $.param({
-        start: start ? start.toISOString() : null,
-        end: end ? end.toISOString() : null,
         label: label,
         keywords: keywords,
         csrfmiddlewaretoken: getCookie('csrftoken')
       }),
+      params: {
+        start: (start) ? start.toISOString() : null,
+        end: (end) ? end.toISOString(): null,
+        calendar_ids: JSON.stringify(calendarIds)
+      },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
   };
 
-  this.editTag = function(tagId, newLabel, newKeywords, start, end, filterKey) {
+  this.editTag = function(tagId, newLabel, newKeywords, start, end, calendarIds, filterKey) {
     return $http({
       method: 'POST',
       url: '/v1/tags/' + tagId,
       data: $.param({
-        start: start ? start.toISOString() : null,
-        end: end ? end.toISOString() : null,
         label: newLabel,
         keywords: newKeywords,
         csrfmiddlewaretoken: getCookie('csrftoken'),
         _method: 'PATCH'
       }),
+      params: {
+        start: (start) ? start.toISOString() : null,
+        end: (end) ? end.toISOString(): null,
+        calendar_ids: JSON.stringify(calendarIds)
+      },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
