@@ -53,9 +53,9 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   this.create = function(tag) {
     var filterData = CalendarFilterService.getFilter();
-    var start = _this.isCumulative ? null : filterData.start;
-    var end = _this.isCumulative ? null : filterData.end;
-    var filterKey = _this.isCumulative ? 'cumulative ' + filterData.filterKey : filterData.filterKey 
+    var start = this.isCumulative ? null : filterData.start;
+    var end = this.isCumulative ? null : filterData.end;
+    var filterKey = this.isCumulative ? 'cumulative ' + filterData.filterKey : filterData.filterKey
     TagService.createTag(tag.label, tag.keywords, start, end,
                         filterData.calendarIds)
       .success(function addToList(data) {
@@ -68,7 +68,7 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
         });
       _this.tags.dataLoaded = true;
       });
-  }.bind(this);
+  };
 
   this.startEdit = function(tagId) {
     var tag = this.tags.find(function(tag, index, array) {
@@ -105,7 +105,7 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
       return tag.id == tagId;
     });
     tag.editing = false;
-  }.bind(this);
+  };
 
   this.delete = function(tagId) {
     TagService.deleteTag(tagId)
