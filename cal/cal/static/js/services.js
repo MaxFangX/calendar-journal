@@ -101,8 +101,8 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         csrfmiddlewaretoken: getCookie('csrftoken')
       }),
       params: {
-        start: (start) ? start.toISOString() : null,
-        end: (end) ? end.toISOString(): null,
+        start: start ? start.toISOString() : null,
+        end: end ? end.toISOString(): null,
         calendar_ids: JSON.stringify(calendarIds)
       },
       headers: {
@@ -122,8 +122,8 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         _method: 'PATCH'
       }),
       params: {
-        start: (start) ? start.toISOString() : null,
-        end: (end) ? end.toISOString(): null,
+        start: start ? start.toISOString() : null,
+        end: end ? end.toISOString(): null,
         calendar_ids: JSON.stringify(calendarIds)
       },
       headers: {
