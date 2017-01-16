@@ -91,7 +91,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
     });
   };
 
-  this.createTag = function(label, keywords, start, end, calendarIds) {
+  this.createTag = function(label, keywords, isCumulative, filterData) {
     return $http({
       method: 'POST',
       url: '/v1/tags.json',
@@ -101,9 +101,9 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         csrfmiddlewaretoken: getCookie('csrftoken')
       }),
       params: {
-        start: start ? start.toISOString() : null,
-        end: end ? end.toISOString(): null,
-        calendar_ids: JSON.stringify(calendarIds)
+        start: isCumulative ? null : filterData.start.toISOString(),
+        end: isCumulative ? null : filterData.end.toISOString(),
+        calendar_ids: JSON.stringify(filterData.calendarIds)
       },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -111,7 +111,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
     });
   };
 
-  this.editTag = function(tagId, newLabel, newKeywords, start, end, calendarIds, filterKey) {
+  this.editTag = function(tagId, newLabel, newKeywords, isCumulative, filterData) {
     return $http({
       method: 'POST',
       url: '/v1/tags/' + tagId,
@@ -122,14 +122,15 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         _method: 'PATCH'
       }),
       params: {
-        start: start ? start.toISOString() : null,
-        end: end ? end.toISOString(): null,
-        calendar_ids: JSON.stringify(calendarIds)
+        start: isCumulative ? null : filterData.start.toISOString(),
+        end: isCumulative ? null : filterData.end.toISOString(),
+        calendar_ids: JSON.stringify(filterData.calendarIds)
       },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).then(function successCallback(response) {
+      var filterKey = isCumulative ? 'cumulative ' + filterData.filterKey : filterData.filterKey;
       _this.tags[filterKey] = null;
       return response.data;
     }, function errorCallback() {

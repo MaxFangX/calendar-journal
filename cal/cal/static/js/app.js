@@ -53,11 +53,7 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   this.create = function(tag) {
     var filterData = CalendarFilterService.getFilter();
-    var start = this.isCumulative ? null : filterData.start;
-    var end = this.isCumulative ? null : filterData.end;
-    var filterKey = this.isCumulative ? 'cumulative ' + filterData.filterKey : filterData.filterKey
-    TagService.createTag(tag.label, tag.keywords, start, end,
-                        filterData.calendarIds)
+    TagService.createTag(tag.label, tag.keywords, this.isCumulative, filterData)
       .success(function addToList(data) {
         _this.tags.push({
           id: data.id,
@@ -82,16 +78,12 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   this.submitEdit = function(tagId) {
     var filterData = CalendarFilterService.getFilter();
-    var start = this.isCumulative ? null : filterData.start;
-    var end = this.isCumulative ? null : filterData.end;
     var tag = this.tags.find(function(tag, index, array) {
       /* jshint unused:vars */
       return tag.id == tagId;
     });
     tag.editing = false;
-    var filterData = CalendarFilterService.getFilter();
-    TagService.editTag(tagId, tag.newLabel, tag.newKeywords, start, end,
-                      filterData.calendarIds, filterData.filterKey)
+    TagService.editTag(tagId, tag.newLabel, tag.newKeywords, this.isCumulative, filterData)
       .then(function(returnedTag) {
         tag.label = returnedTag.label;
         tag.keywords = returnedTag.keywords;
