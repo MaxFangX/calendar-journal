@@ -605,7 +605,11 @@ class Category(models.Model, EventCollection):
 
     def query(self, calendar_ids=None, start=None, end=None):
         if self.calendar:  # Calendar Category
-            calendars = [self.calendar]
+            calendar_in_ids = calendar_ids is not None and self.calendar.calendar_id in calendar_ids
+            if calendar_ids is None or calendar_in_ids:
+                calendars = [self.calendar]
+            else:
+                return []
         else:  # Color Category
             calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
 
