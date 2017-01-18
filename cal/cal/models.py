@@ -605,8 +605,8 @@ class Category(models.Model, EventCollection):
 
     def query(self, calendar_ids=None, start=None, end=None):
         if self.calendar:  # Calendar Category
-            calendar_in_ids = calendar_ids is not None and self.calendar.calendar_id in calendar_ids
-            if calendar_ids is None or calendar_in_ids:
+            # Added so deselecting calendars returns 0 hours for category
+            if not calendar_ids or (calendar_ids and self.calendar.calendar_id in calendar_ids):
                 calendars = [self.calendar]
             else:
                 return []
