@@ -253,10 +253,22 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
 }]);
 
 analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
+
   var _this = this;
 
-  var details = {};
-  this.populateData = function(type, id, timeStep, calendarIds) {
+  this.details = {};
+
+  this.populateData = function(filterKey, type, id, timeStep, calendarIds) {
+    if (!filterKey) {
+      throw "filterKey must always be supplied";
+    }
+
+    // Attempt to return cached categories
+    if (_this.details[filterKey]) {
+      console.log('cached')
+      return $q.when(_this.details[filterKey]);
+    }
+
     var timeseriesUrl = "";
     if (type == "Category") {
       timeseriesUrl = '/v1/categories/' + id + '/timeseries/' + timeStep;
@@ -335,8 +347,8 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
           strokeWidth: 3,
         });
       }
-
-      return [ctrlDetails, maxYValue];
+      _this.details[filterKey] = [ctrlDetails, maxYValue];
+      return _this.details[filterKey];
     });
   };
 
