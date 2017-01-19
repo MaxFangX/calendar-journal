@@ -548,7 +548,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   };
 
   this.initialize = function() {
-    this.showDaily();
+    this.showWeekly();
     this.getEvents(1);
   }.bind(this);
 
