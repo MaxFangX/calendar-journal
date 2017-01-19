@@ -123,11 +123,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   var _this = this;
   var tagUrl = '/v1/tags/' + this.tagId;
   var tagEvent = '/v1/tags/' + this.tagId + '/events';
-  var timeseriesWeek = '/v1/tags/' + this.tagId + '/timeseries/week';
-  var timeseriesMonth = '/v1/tags/' + this.tagId + '/timeseries/month';
-  var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
   var categoryTags = '/v1/tags/' + this.tagId + '/by-category';
-  var query_timezone = moment.tz.guess();
   var calendarIds = [];
   this.tagHours = 0;
   this.tagEvents = [];
@@ -224,58 +220,32 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   };
 
   this.showDaily = function() {
-    $http({
-      method: 'GET',
-      url: timeseriesDay + '.json',
-      params: {
-        timezone: query_timezone,
-        calendar_ids: JSON.stringify(calendarIds),
-      }
-    }).
-    success(function successCallback(data) {
+    QueryService.populateData('Tag', _this.tagId, "day", calendarIds).
+    then(function populate(data) {
       _this.timeStep = "day";
-      // round(... * 100) / 100 necessary to round average hours to two decimal
-      _this.averageHours = Math.round(((_this.tagHours / data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(data, 'Tag');
-      _this.ctrlGraphData = eventData[0];
-      _this.showGraph(eventData[1]);
+      _this.averageHours = Math.round(((_this.tagHours / data[0][0].values.length) * 100)) / 100;
+      _this.ctrlGraphData = data[0];
+      _this.showGraph(data[1]);
     });
   };
 
   this.showWeekly = function() {
-    $http({
-      method: 'GET',
-      url: timeseriesWeek + '.json',
-      params: {
-        timezone: query_timezone,
-        calendar_ids: JSON.stringify(calendarIds),
-      }
-    }).
-    success(function successCallback(data) {
+    QueryService.populateData('Tag', _this.tagId, "week", calendarIds).
+    then(function populate(data) {
       _this.timeStep = "week";
-      // round(... * 100) / 100 necessary to round average hours to two decimal
-      _this.averageHours = Math.round(((_this.tagHours / data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(data, 'Tag');
-      _this.ctrlGraphData = eventData[0];
-      _this.showGraph(eventData[1]);
+      _this.averageHours = Math.round(((_this.tagHours / data[0][0].values.length) * 100)) / 100;
+      _this.ctrlGraphData = data[0];
+      _this.showGraph(data[1]);
     });
   };
 
   this.showMonthly = function() {
-    $http({
-      method: 'GET',
-      url: timeseriesMonth + '.json',
-      params: {
-        timezone: query_timezone,
-        calendar_ids: JSON.stringify(calendarIds),
-      }
-    }).
-    success(function successCallback(data) {
+    QueryService.populateData('Tag', _this.tagId, "month", calendarIds).
+    then(function populate(data) {
       _this.timeStep = "month";
-      _this.averageHours = Math.round(((_this.tagHours / data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(data, 'Tag');
-      _this.ctrlGraphData = eventData[0];
-      _this.showGraph(eventData[1]);
+      _this.averageHours = Math.round(((_this.tagHours / data[0][0].values.length) * 100)) / 100;
+      _this.ctrlGraphData = data[0];
+      _this.showGraph(data[1]);
     });
   };
 
@@ -509,7 +479,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService,　CalendarFilterServi
   }.bind(this);
 
   this.showDaily = function() {
-    QueryService.populateData('Category', this.categoryId, "day").
+    QueryService.populateData('Category', _this.categoryId, "day", []).
     then(function populate(data) {
       _this.timeStep = "day";
       _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;
@@ -519,7 +489,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService,　CalendarFilterServi
   };
 
   this.showWeekly = function() {
-    QueryService.populateData('Category', this.categoryId, "week").
+    QueryService.populateData('Category', _this.categoryId, "week", []).
     then(function populate(data) {
       _this.timeStep = "week";
       _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;
@@ -529,7 +499,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService,　CalendarFilterServi
   };
 
   this.showMonthly = function() {
-    QueryService.populateData('Category', this.categoryId, "month").
+    QueryService.populateData('Category', _this.categoryId, "month", []).
     then(function populate(data) {
       _this.timeStep = "month";
       _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;

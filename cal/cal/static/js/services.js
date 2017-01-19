@@ -256,13 +256,19 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
   var _this = this;
 
   var details = {};
-  this.populateData = function(type, id, timeStep) {
-    var timeseriesUrl = '/v1/categories/' + id + '/timeseries/' + timeStep;
+  this.populateData = function(type, id, timeStep, calendarIds) {
+    var timeseriesUrl = "";
+    if (type == "Category") {
+      timeseriesUrl = '/v1/categories/' + id + '/timeseries/' + timeStep;
+    } else {
+      timeseriesUrl = '/v1/tags/' + id + '/timeseries/' + timeStep;
+    }
     return $http({
       method: 'GET',
       url: timeseriesUrl + '.json',
       params: {
         timezone: moment.tz.guess(),
+        calendar_ids: JSON.stringify(calendarIds)
       }
     }).then(function successCallback(response) {
       var data = response.data
