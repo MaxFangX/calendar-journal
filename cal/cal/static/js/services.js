@@ -252,73 +252,86 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
 
 }]);
 
-analyticsApp.service('QueryService', function() {
-  this.populateData = function(data, type) {
-    var ctrlDetails = [];
-    var maxYValue = 0;
-    var events = [];
-    var movingAverage = [];
-    var xLabels = [];
-    var yLabels = [];
-    for (var i = 0; i < data[0].length; i++) {
-      var event = data[0][i];
-      var date = new Date(event[0]);
-      var hours = event[1];
-      if (hours > maxYValue) {
-        maxYValue = hours;
+analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
+  var _this = this;
+
+  var details = {};
+  this.populateData = function(type, id, timeStep) {
+    var timeseriesUrl = '/v1/categories/' + id + '/timeseries/' + timeStep;
+    return $http({
+      method: 'GET',
+      url: timeseriesUrl + '.json',
+      params: {
+        timezone: moment.tz.guess(),
       }
-      xLabels.push(date);
-      yLabels.push(hours);
-      events.push({
-        x: date,
-        y: hours
+    }).then(function successCallback(response) {
+      var data = response.data
+      var ctrlDetails = [];
+      var maxYValue = 0;
+      var events = [];
+      var movingAverage = [];
+      var xLabels = [];
+      var yLabels = [];
+      for (var i = 0; i < data[0].length; i++) {
+        var event = data[0][i];
+        var date = new Date(event[0]);
+        var hours = event[1];
+        if (hours > maxYValue) {
+          maxYValue = hours;
+        }
+        xLabels.push(date);
+        yLabels.push(hours);
+        events.push({
+          x: date,
+          y: hours
+        });
+
+        if (i < data[1].length) {
+          // MA = Moving Average
+          var MAEvent = data[1][i];
+          var MADate = new Date(MAEvent[0]);
+          var MAHours = MAEvent[1];
+          movingAverage.push({
+            x: MADate,
+            y: MAHours
+          });
+        }
+      }
+      var xSeries = d3.range(1, xLabels.length + 1);
+      var leastSquaresCoeff = leastSquares(xSeries, yLabels);
+
+      // apply the results of the least squares regression
+      var x1 = xLabels[0];
+      var y1 = leastSquaresCoeff[0] + leastSquaresCoeff[1];
+      var x2 = xLabels[xLabels.length - 1];
+      var y2 = leastSquaresCoeff[0] * xSeries.length + leastSquaresCoeff[1];
+      var trendData = [{x:x1,y:y1},{x:x2,y:y2}];
+
+      ctrlDetails.push({
+        values: events,
+        key: type + ' Line',
+        color: '#DDD5C7',
+        strokeWidth: 2,
       });
 
-      if (i < data[1].length) {
-        // MA = Moving Average
-        var MAEvent = data[1][i];
-        var MADate = new Date(MAEvent[0]);
-        var MAHours = MAEvent[1];
-        movingAverage.push({
-          x: MADate,
-          y: MAHours
-        });
-      }
-    }
-    var xSeries = d3.range(1, xLabels.length + 1);
-    var leastSquaresCoeff = leastSquares(xSeries, yLabels);
-
-    // apply the results of the least squares regression
-    var x1 = xLabels[0];
-    var y1 = leastSquaresCoeff[0] + leastSquaresCoeff[1];
-    var x2 = xLabels[xLabels.length - 1];
-    var y2 = leastSquaresCoeff[0] * xSeries.length + leastSquaresCoeff[1];
-    var trendData = [{x:x1,y:y1},{x:x2,y:y2}];
-
-    ctrlDetails.push({
-      values: events,
-      key: type + ' Line',
-      color: '#DDD5C7',
-      strokeWidth: 2,
-    });
-
-    ctrlDetails.push({
-      values: trendData,
-      key: 'Trend Line',
-      color: '#FDB515',
-      strokeWidth: 3,
-    });
-
-    if (movingAverage.length != 1) {
       ctrlDetails.push({
-        values: movingAverage,
-        key: '7D Moving Average Line',
-        color: '#003057',
+        values: trendData,
+        key: 'Trend Line',
+        color: '#FDB515',
         strokeWidth: 3,
       });
-    }
 
-    return [ctrlDetails, maxYValue];
+      if (movingAverage.length != 1) {
+        ctrlDetails.push({
+          values: movingAverage,
+          key: '7D Moving Average Line',
+          color: '#003057',
+          strokeWidth: 3,
+        });
+      }
+
+      return [ctrlDetails, maxYValue];
+    });
   };
 
   // returns slope, intercept and r-square of the line
@@ -343,4 +356,4 @@ analyticsApp.service('QueryService', function() {
 
     return [slope, intercept, rSquare];
   }
-});
+}]);
