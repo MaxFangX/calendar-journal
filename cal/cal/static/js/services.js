@@ -265,7 +265,6 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
 
     // Attempt to return cached categories
     if (_this.details[filterKey]) {
-      console.log('cached')
       return $q.when(_this.details[filterKey]);
     }
 
