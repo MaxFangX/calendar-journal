@@ -258,7 +258,35 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
 
   this.details = {};
 
-  this.populateData = function(filterKey, type, id, timeStep, calendarIds) {
+  this.populateWeek = function(filterKey, type, id, timeStep, calendarIds, data) {
+    var dailyData = data[0][0].values
+    var start = new Date(dailyData[0].x)
+    var weeklyData = [];
+    var ctrlDetails = [];
+    // Find closest Monday
+    start.setDate(start.getDate() - start.getDay() + (start.getDay() == 0 ? -6:1));
+    var weeklyHours = 0;
+    for (var i = 0; i < dailyData.length; i++) {
+      weeklyHours += dailyData[i].y;
+      if (i % 7 == 6) {
+        weeklyData.push({
+          x: new Date(start),
+          y: weeklyHours
+        });
+        weeklyHours = 0;
+        start.setDate(start.getDate() + 7);
+      }
+    }
+    ctrlDetails.push({
+      values: weeklyData,
+      key: type + ' Line',
+      color: '#DDD5C7',
+      strokeWidth: 2,
+    });
+    return [ctrlDetails, 100];
+  }
+
+  this.populateData = function(filterKey, type, id, timeStep, calendarIds, data) {
     if (!filterKey) {
       throw "filterKey must always be supplied";
     }
@@ -268,11 +296,39 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
       return $q.when(_this.details[filterKey]);
     }
 
+    if (timeStep == "month") {
+      return new Promise(function(resolve, reject) {
+        return data;
+      });
+    }
+    if (timeStep == "week") {
+      return new Promise(function(resolve, reject) {
+        var dailyData = data[0][0].values
+        var start = new Date(dailyData[0].x)
+        var weeklyData = []
+        // Find closest Monday
+        start.setDate(start.getDate() - start.getDay() + (start.getDay() == 0 ? -6:1));
+        var weeklyHours = 0;
+        for (var i = 0; i < dailyData.length; i++) {
+          weeklyHours += dailyData[i].y;
+          if (i % 7 == 0 && i != 0) {
+            weeklyData.push({
+              x: new Date(start),
+              y: weeklyHours
+            });
+            weeklyHours = 0;
+            start.setDate(start.getDate() + 7);
+          }
+        }
+        return [weeklyData, 100];
+      });
+    }
+
     var timeseriesUrl = "";
     if (type == "Category") {
-      timeseriesUrl = '/v1/categories/' + id + '/timeseries/' + timeStep;
+      timeseriesUrl = '/v1/categories/' + id + '/timeseries/day';
     } else {
-      timeseriesUrl = '/v1/tags/' + id + '/timeseries/' + timeStep;
+      timeseriesUrl = '/v1/tags/' + id + '/timeseries/day';
     }
     return $http({
       method: 'GET',

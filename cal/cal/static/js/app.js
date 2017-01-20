@@ -442,6 +442,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   var categoryUrl = '/v1/categories/' + this.categoryId + '/events';
   this.categoryEvents = [];
   this.pageEvents = [];
+  this.dailyData = [];
   this.categoryEvents.dataLoaded = false;
   this.timeStep = "";
   this.currentPage = 0;
@@ -482,27 +483,28 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   }.bind(this);
 
   this.showDaily = function() {
-    QueryService.populateData('Category day' + _this.categoryId, 'Category', _this.categoryId, "day", []).
+    QueryService.populateData('Category day' + _this.categoryId, 'Category', _this.categoryId, "day", [], []).
     then(function populate(data) {
       _this.timeStep = "day";
       _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;
+      console.log(data)
       _this.ctrlGraphData = data[0];
       _this.showGraph(data[1]);
+      _this.dailyData = data;
     });
   };
 
   this.showWeekly = function() {
-    QueryService.populateData('Category week' + _this.categoryId, 'Category', _this.categoryId, "week", []).
-    then(function populate(data) {
-      _this.timeStep = "week";
-      _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;
-      _this.ctrlGraphData = data[0];
-      _this.showGraph(data[1]);
-    });
+    var data = QueryService.populateWeek('Category week' + _this.categoryId, 'Category', _this.categoryId, "week", [], _this.dailyData);
+    _this.timeStep = "week";
+    _this.averageHours = Math.round(((_this.categoryHours / data[0][0].length) * 100)) / 100;
+    console.log(data)
+    _this.ctrlGraphData = data[0];
+    _this.showGraph(data[1]);
   };
 
   this.showMonthly = function() {
-    QueryService.populateData('Category month' + _this.categoryId, 'Category', _this.categoryId, "month", []).
+    QueryService.populateData('Category month' + _this.categoryId, 'Category', _this.categoryId, "month", [], _this.dailyData).
     then(function populate(data) {
       _this.timeStep = "month";
       _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;
@@ -548,7 +550,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   };
 
   this.initialize = function() {
-    this.showWeekly();
+    this.showDaily();
     this.getEvents(1);
   }.bind(this);
 
