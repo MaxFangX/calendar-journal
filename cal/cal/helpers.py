@@ -134,8 +134,12 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
         if data_point < period - 1:
             moving_average += total
         else:
-            # We need to find hours of first event to subtract off
-            first_event = week_hours[int(data_point - period)][1]
+            if data_point - period == -1:
+                # Account for period-th day
+                first_event = 0
+            else:
+                # We need to find hours of first event to subtract off
+                first_event = week_hours[int(data_point - period)][1]
             moving_average = moving_average - first_event + total
             moving_average_lst.append((start, moving_average / period))
         data_point += 1

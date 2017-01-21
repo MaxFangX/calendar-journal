@@ -262,27 +262,99 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
     var dailyData = data[0][0].values
     var start = new Date(dailyData[0].x)
     var weeklyData = [];
+    var movingAverageList = [];
     var ctrlDetails = [];
+    var offset = start.getDay();
     // Find closest Monday
     start.setDate(start.getDate() - start.getDay() + (start.getDay() == 0 ? -6:1));
+
     var weeklyHours = 0;
+    var xLabels = [];
+    var yLabels = [];
+
+    // Moving average
+    var data_point = 0;
+    var moving_average = 0;
+    var period = 7;
+
     for (var i = 0; i < dailyData.length; i++) {
       weeklyHours += dailyData[i].y;
-      if (i % 7 == 6) {
+      if ((i + offset) % 7 == 0) {
+        xLabels.push(new Date(start));
+        yLabels.push(weeklyHours);
         weeklyData.push({
           x: new Date(start),
           y: weeklyHours
         });
+
+        // Moving average logic.
+        if (data_point < period - 1) {
+          moving_average += weeklyHours;
+        } else {
+          if (data_point - period == -1) {
+            first_event = 0
+          } else {
+            first_event = weeklyData[data_point - period].y;
+          }
+          moving_average = moving_average - first_event + weeklyHours;
+          movingAverageList.push({
+            x: new Date(start),
+            y: moving_average / period
+          })
+        }
+        data_point += 1
+
         weeklyHours = 0;
         start.setDate(start.getDate() + 7);
       }
     }
+
+    // Take care of this week
+    if ((i + offset) % 7 != 0) {
+      xLabels.push(new Date(start));
+      yLabels.push(weeklyHours);
+      weeklyData.push({
+        x: new Date(start),
+        y: weeklyHours
+      });
+
+      // Moving average for this week
+      first_event = weeklyData[data_point - period].y;
+      moving_average = moving_average - first_event + weeklyHours;
+      movingAverageList.push({
+        x: new Date(start),
+        y: moving_average / period
+      })
+    }
+
+    if (movingAverageList == []) {
+      movingAverageList = [(0,0)]
+    }
+
+    var trendData = trendLine(xLabels, yLabels);
+
     ctrlDetails.push({
       values: weeklyData,
       key: type + ' Line',
       color: '#DDD5C7',
       strokeWidth: 2,
     });
+
+    ctrlDetails.push({
+      values: trendData,
+      key: 'Trend Line',
+      color: '#FDB515',
+      strokeWidth: 3,
+    });
+
+    if (movingAverageList.length != 1) {
+      ctrlDetails.push({
+        values: movingAverageList,
+        key: '7D Moving Average Line',
+        color: '#003057',
+        strokeWidth: 3,
+      });
+    }
     return [ctrlDetails, 100];
   }
 
@@ -303,24 +375,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
     }
     if (timeStep == "week") {
       return new Promise(function(resolve, reject) {
-        var dailyData = data[0][0].values
-        var start = new Date(dailyData[0].x)
-        var weeklyData = []
-        // Find closest Monday
-        start.setDate(start.getDate() - start.getDay() + (start.getDay() == 0 ? -6:1));
-        var weeklyHours = 0;
-        for (var i = 0; i < dailyData.length; i++) {
-          weeklyHours += dailyData[i].y;
-          if (i % 7 == 0 && i != 0) {
-            weeklyData.push({
-              x: new Date(start),
-              y: weeklyHours
-            });
-            weeklyHours = 0;
-            start.setDate(start.getDate() + 7);
-          }
-        }
-        return [weeklyData, 100];
+        return data;
       });
     }
 
@@ -370,15 +425,8 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
           });
         }
       }
-      var xSeries = d3.range(1, xLabels.length + 1);
-      var leastSquaresCoeff = leastSquares(xSeries, yLabels);
 
-      // apply the results of the least squares regression
-      var x1 = xLabels[0];
-      var y1 = leastSquaresCoeff[0] + leastSquaresCoeff[1];
-      var x2 = xLabels[xLabels.length - 1];
-      var y2 = leastSquaresCoeff[0] * xSeries.length + leastSquaresCoeff[1];
-      var trendData = [{x:x1,y:y1},{x:x2,y:y2}];
+      var trendData = trendLine(xLabels, yLabels);
 
       ctrlDetails.push({
         values: events,
@@ -407,6 +455,19 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
     });
   };
 
+
+  function trendLine(xLabels, yLabels) {
+    var xSeries = d3.range(1, xLabels.length + 1);
+    var leastSquaresCoeff = leastSquares(xSeries, yLabels);
+
+    // apply the results of the least squares regression
+    var x1 = xLabels[0];
+    var y1 = leastSquaresCoeff[0] + leastSquaresCoeff[1];
+    var x2 = xLabels[xLabels.length - 1];
+    var y2 = leastSquaresCoeff[0] * xSeries.length + leastSquaresCoeff[1];
+    return [{x:x1,y:y1},{x:x2,y:y2}];
+
+  }
   // returns slope, intercept and r-square of the line
   function leastSquares(xSeries, ySeries) {
     var reduceSumFunc = function(prev, cur) { return prev + cur; };

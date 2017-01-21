@@ -487,7 +487,6 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     then(function populate(data) {
       _this.timeStep = "day";
       _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;
-      console.log(data)
       _this.ctrlGraphData = data[0];
       _this.showGraph(data[1]);
       _this.dailyData = data;
@@ -497,7 +496,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.showWeekly = function() {
     var data = QueryService.populateWeek('Category week' + _this.categoryId, 'Category', _this.categoryId, "week", [], _this.dailyData);
     _this.timeStep = "week";
-    _this.averageHours = Math.round(((_this.categoryHours / data[0][0].length) * 100)) / 100;
+    _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.lengths) * 100)) / 100;
     console.log(data)
     _this.ctrlGraphData = data[0];
     _this.showGraph(data[1]);
