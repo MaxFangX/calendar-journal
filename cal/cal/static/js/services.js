@@ -258,34 +258,56 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
 
   this.details = {};
 
-  this.populateWeek = function(filterKey, type, id, timeStep, calendarIds, data) {
-    var dailyData = data[0][0].values
-    var start = new Date(dailyData[0].x)
-    var weeklyData = [];
-    var movingAverageList = [];
-    var ctrlDetails = [];
-    var offset = start.getDay();
-    // Find closest Monday
-    start.setDate(start.getDate() - start.getDay() + (start.getDay() == 0 ? -6:1));
+  this.populateData = function(filterKey, type, id, timeStep, data) {
+    // Attempt to return cached categories
+    if (_this.details[filterKey]) {
+      return $q.when(_this.details[filterKey]);
+    }
 
+    var dailyData = data[0][0].values
+    var ctrlDetails = [];
+
+    // Type line
+    var start = new Date(dailyData[0].x)
+    console.log(new Date(start.getYear(), start.getMonth(), 0).getDate())
+    console.log(start.getDate());
+    var offset = start.getDay();
+
+    if (timeStep == "week") {
+      // Find closest Monday
+      start.setDate(start.getDate() - start.getDay() + (start.getDay() == 0 ? -6:1));
+    }
+    // TODO set to first of month
     var weeklyHours = 0;
+    var maxYValue = 0;
+
+    // Trendline
     var xLabels = [];
     var yLabels = [];
 
     // Moving average
+    var weeklyData = [];
+    var movingAverageList = [];
     var data_point = 0;
     var moving_average = 0;
     var period = 7;
 
     for (var i = 0; i < dailyData.length; i++) {
       weeklyHours += dailyData[i].y;
+
+      // TODO change condition for month
       if ((i + offset) % 7 == 0) {
         xLabels.push(new Date(start));
         yLabels.push(weeklyHours);
+
         weeklyData.push({
           x: new Date(start),
           y: weeklyHours
         });
+
+        if (weeklyHours > maxYValue) {
+          maxYValue = weeklyHours;
+        }
 
         // Moving average logic.
         if (data_point < period - 1) {
@@ -305,10 +327,13 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
         data_point += 1
 
         weeklyHours = 0;
+
+        //TODO change to month
         start.setDate(start.getDate() + 7);
       }
     }
 
+    // TODO change for month
     // Take care of this week
     if ((i + offset) % 7 != 0) {
       xLabels.push(new Date(start));
@@ -355,10 +380,11 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
         strokeWidth: 3,
       });
     }
-    return [ctrlDetails, 100];
+    _this.details[filterKey] = [ctrlDetails, maxYValue + 10];
+    return _this.details[filterKey];
   }
 
-  this.populateData = function(filterKey, type, id, timeStep, calendarIds, data) {
+  this.populateDay = function(filterKey, type, id, calendarIds) {
     if (!filterKey) {
       throw "filterKey must always be supplied";
     }
@@ -368,16 +394,8 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
       return $q.when(_this.details[filterKey]);
     }
 
-    if (timeStep == "month") {
-      return new Promise(function(resolve, reject) {
-        return data;
-      });
-    }
-    if (timeStep == "week") {
-      return new Promise(function(resolve, reject) {
-        return data;
-      });
-    }
+    // Reset cache
+    _this.details = {};
 
     var timeseriesUrl = "";
     if (type == "Category") {
@@ -468,6 +486,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
     return [{x:x1,y:y1},{x:x2,y:y2}];
 
   }
+
   // returns slope, intercept and r-square of the line
   function leastSquares(xSeries, ySeries) {
     var reduceSumFunc = function(prev, cur) { return prev + cur; };

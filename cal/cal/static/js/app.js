@@ -483,7 +483,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   }.bind(this);
 
   this.showDaily = function() {
-    QueryService.populateData('Category day' + _this.categoryId, 'Category', _this.categoryId, "day", [], []).
+    QueryService.populateDay('Category day' + _this.categoryId, 'Category', _this.categoryId, []).
     then(function populate(data) {
       _this.timeStep = "day";
       _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;
@@ -494,22 +494,21 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   };
 
   this.showWeekly = function() {
-    var data = QueryService.populateWeek('Category week' + _this.categoryId, 'Category', _this.categoryId, "week", [], _this.dailyData);
+    var data = QueryService.populateData('Category week' + _this.categoryId, 'Category', _this.categoryId, "week", _this.dailyData);
     _this.timeStep = "week";
-    _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.lengths) * 100)) / 100;
-    console.log(data)
+    var numWeeks = data[0][0].values.length;
+    _this.averageHours = Math.round(((_this.categoryHours / numWeeks) * 100)) / 100;
     _this.ctrlGraphData = data[0];
     _this.showGraph(data[1]);
   };
 
   this.showMonthly = function() {
-    QueryService.populateData('Category month' + _this.categoryId, 'Category', _this.categoryId, "month", [], _this.dailyData).
-    then(function populate(data) {
-      _this.timeStep = "month";
-      _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;
-      _this.ctrlGraphData = data[0];
-      _this.showGraph(data[1]);
-    });
+    var data = QueryService.populateData('Category month' + _this.categoryId, 'Category', _this.categoryId, "month", _this.dailyData);
+    _this.timeStep = "month";
+    var numMonths = data[0][0].values.length;
+    _this.averageHours = Math.round(((_this.categoryHours / numMonths) * 100)) / 100;
+    _this.ctrlGraphData = data[0];
+    _this.showGraph(data[1]);
   };
 
   this.showPageEvents = function() {
