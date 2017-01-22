@@ -127,6 +127,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   this.tagHours = 0;
   this.tagEvents = [];
   this.pageEvents = [];
+  this.dailyData = [];
   this.tagEvents.dataLoaded = false;
   this.timeStep = "";
   this.currentPage = 0;
@@ -219,35 +220,34 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
 
   this.showDaily = function() {
     var filterData = CalendarFilterService.getFilter();
-    QueryService.populateData('day ' + filterData.filterKey, 'Tag', _this.tagId, "day", filterData.calendarIds).
+    QueryService.populateDay('Tag day ' + filterData.filterKey, 'Tag', _this.tagId, filterData.calendarIds).
     then(function populate(data) {
       _this.timeStep = "day";
       _this.averageHours = Math.round(((_this.tagHours / data[0][0].values.length) * 100)) / 100;
       _this.ctrlGraphData = data[0];
       _this.showGraph(data[1]);
+      _this.dailyData = data;
     });
   };
 
   this.showWeekly = function() {
     var filterData = CalendarFilterService.getFilter();
-    QueryService.populateData('week ' + filterData.filterKey, 'Tag', _this.tagId, "week", filterData.calendarIds).
-    then(function populate(data) {
-      _this.timeStep = "week";
-      _this.averageHours = Math.round(((_this.tagHours / data[0][0].values.length) * 100)) / 100;
-      _this.ctrlGraphData = data[0];
-      _this.showGraph(data[1]);
-    });
+    var data = QueryService.populateData('Tag week ' + filterData.filterKey, 'Tag', _this.tagId, "week", _this.dailyData)
+    _this.timeStep = "week";
+    var numWeeks = data[0][0].values.length
+    _this.averageHours = Math.round(((_this.tagHours / numWeeks) * 100)) / 100;
+    _this.ctrlGraphData = data[0];
+    _this.showGraph(data[1]);
   };
 
   this.showMonthly = function() {
     var filterData = CalendarFilterService.getFilter();
-    QueryService.populateData('month ' + filterData.filterKey, 'Tag', _this.tagId, "month", filterData.calendarIds).
-    then(function populate(data) {
-      _this.timeStep = "month";
-      _this.averageHours = Math.round(((_this.tagHours / data[0][0].values.length) * 100)) / 100;
-      _this.ctrlGraphData = data[0];
-      _this.showGraph(data[1]);
-    });
+    var data = QueryService.populateData('Tag month ' + filterData.filterKey, 'Tag', _this.tagId, "month", _this.dailyData)
+    _this.timeStep = "month";
+    var numMonths = data[0][0].values.length
+    _this.averageHours = Math.round(((_this.tagHours / numMonths) * 100)) / 100;
+    _this.ctrlGraphData = data[0];
+    _this.showGraph(data[1]);
   };
 
   this.showPageEvents = function() {
@@ -300,10 +300,10 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     }).
     success(function successCallback(data) {
       _this.tagHours = data.hours;
-      if (_this.timeStep === "day") {
+      if (_this.timeStep === "day" || _this.timeStep === "") {
         _this.showDaily();
       }
-      if (_this.timeStep === "week" || _this.timeStep === "") {
+      if (_this.timeStep === "week") {
         _this.showWeekly();
       }
       if (_this.timeStep === "month") {

@@ -261,24 +261,28 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
   this.populateData = function(filterKey, type, id, timeStep, data) {
     // Attempt to return cached categories
     if (_this.details[filterKey]) {
-      return $q.when(_this.details[filterKey]);
+      return _this.details[filterKey];
     }
 
     var dailyData = data[0][0].values
     var ctrlDetails = [];
 
     // Type line
+    var timeStepData = [];
     var start = new Date(dailyData[0].x)
-    console.log(new Date(start.getYear(), start.getMonth(), 0).getDate())
-    console.log(start.getDate());
-    var offset = start.getDay();
+    var offset = 0;
 
     if (timeStep == "week") {
       // Find closest Monday
       start.setDate(start.getDate() - start.getDay() + (start.getDay() == 0 ? -6:1));
+      offset = start.getDay();
     }
-    // TODO set to first of month
-    var weeklyHours = 0;
+    if (timeStep == "month") {
+      offset = start.getDate();
+      start.setDate(1);
+    }
+
+    var timeStepHours = 0;
     var maxYValue = 0;
 
     // Trendline
@@ -286,39 +290,47 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
     var yLabels = [];
 
     // Moving average
-    var weeklyData = [];
     var movingAverageList = [];
     var data_point = 0;
     var moving_average = 0;
     var period = 7;
+    var endOfTimeStep = true;
 
     for (var i = 0; i < dailyData.length; i++) {
-      weeklyHours += dailyData[i].y;
+      timeStepHours += dailyData[i].y;
 
-      // TODO change condition for month
-      if ((i + offset) % 7 == 0) {
+      if (timeStep == "week") {
+        endOfTimeStep = (i + offset) % 7 == 0;
+      }
+      if (timeStep == "month") {
+        endOfTimeStep = offset == new Date(start.getYear(), start.getMonth() + 1, 0).getDate();
+        offset += 1;
+      }
+
+      if (endOfTimeStep) {
         xLabels.push(new Date(start));
-        yLabels.push(weeklyHours);
+        yLabels.push(timeStepHours);
 
-        weeklyData.push({
+        timeStepData.push({
           x: new Date(start),
-          y: weeklyHours
+          y: timeStepHours
         });
 
-        if (weeklyHours > maxYValue) {
-          maxYValue = weeklyHours;
+        // Max Y Value logic
+        if (timeStepHours > maxYValue) {
+          maxYValue = timeStepHours;
         }
 
         // Moving average logic.
         if (data_point < period - 1) {
-          moving_average += weeklyHours;
+          moving_average += timeStepHours;
         } else {
           if (data_point - period == -1) {
             first_event = 0
           } else {
-            first_event = weeklyData[data_point - period].y;
+            first_event = timeStepData[data_point - period].y;
           }
-          moving_average = moving_average - first_event + weeklyHours;
+          moving_average = moving_average - first_event + timeStepHours;
           movingAverageList.push({
             x: new Date(start),
             y: moving_average / period
@@ -326,40 +338,47 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
         }
         data_point += 1
 
-        weeklyHours = 0;
-
-        //TODO change to month
-        start.setDate(start.getDate() + 7);
+        timeStepHours = 0;
+        if (timeStep == "week") {
+          start.setDate(start.getDate() + 7);
+        }
+        if (timeStep == "month") {
+          offset = 1;
+          start.setMonth(start.getMonth() + 1);
+        }
       }
     }
 
-    // TODO change for month
-    // Take care of this week
-    if ((i + offset) % 7 != 0) {
+    if (timeStep == "week") {
+      endOfTimeStep = (i + offset) % 7 != 0;
+    }
+    if (timeStep == "month") {
+      endOfTimeStep = offset != new Date(start.getYear(), start.getMonth() + 1, 0).getDate();
+    }
+    // Take care of this week/month
+    if (endOfTimeStep) {
       xLabels.push(new Date(start));
-      yLabels.push(weeklyHours);
-      weeklyData.push({
+      yLabels.push(timeStepHours);
+      timeStepData.push({
         x: new Date(start),
-        y: weeklyHours
+        y: timeStepHours
       });
 
-      // Moving average for this week
-      first_event = weeklyData[data_point - period].y;
-      moving_average = moving_average - first_event + weeklyHours;
-      movingAverageList.push({
-        x: new Date(start),
-        y: moving_average / period
-      })
-    }
-
-    if (movingAverageList == []) {
-      movingAverageList = [(0,0)]
+      if (data_point > period - 1) {
+        // Moving average for this week/month
+        first_event = timeStepData[data_point - period].y;
+        moving_average = moving_average - first_event + timeStepHours;
+        movingAverageList.push({
+          x: new Date(start),
+          y: moving_average / period
+        })
+      }
     }
 
     var trendData = trendLine(xLabels, yLabels);
 
     ctrlDetails.push({
-      values: weeklyData,
+      values: timeStepData,
       key: type + ' Line',
       color: '#DDD5C7',
       strokeWidth: 2,
@@ -372,14 +391,13 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
       strokeWidth: 3,
     });
 
-    if (movingAverageList.length != 1) {
-      ctrlDetails.push({
-        values: movingAverageList,
-        key: '7D Moving Average Line',
-        color: '#003057',
-        strokeWidth: 3,
-      });
-    }
+    ctrlDetails.push({
+      values: movingAverageList,
+      key: '7D Moving Average Line',
+      color: '#003057',
+      strokeWidth: 3,
+    });
+
     _this.details[filterKey] = [ctrlDetails, maxYValue + 10];
     return _this.details[filterKey];
   }
