@@ -412,9 +412,6 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
       return $q.when(_this.details[filterKey]);
     }
 
-    // Reset cache
-    _this.details = {};
-
     var timeseriesUrl = "";
     if (type == "Category") {
       timeseriesUrl = '/v1/categories/' + id + '/timeseries/day';
