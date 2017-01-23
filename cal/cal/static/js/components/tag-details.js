@@ -90,7 +90,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     $http({
       method: 'GET',
       url: categoryTags + '.json',
-    }).success(function successCallback(data) {
+    }).then(function successCallback(data) {
       _this.tagsByCategoriesData = [];
       for (var i = 0; i < data.length; i++) {
         var category = data[i];
@@ -101,6 +101,8 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
         });
       }
       _this.showCategoryPie();
+    }, function errorCallback() {
+      console.log("Failed to get tags by categories")
     });
   };
 
@@ -112,14 +114,15 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
         timezone: query_timezone,
         calendar_ids: JSON.stringify(calendarIds),
       }
-    }).
-    success(function successCallback(data) {
+    }).then(function successCallback(data) {
       _this.timeStep = "day";
       // round(... * 100) / 100 necessary to round average hours to two decimal
       _this.averageHours = Math.round(((_this.tagHours / data[0].length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
+    }, function errorCallback() {
+      throw "Failed to get timeseries day";
     });
   };
 
@@ -131,15 +134,16 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
         timezone: query_timezone,
         calendar_ids: JSON.stringify(calendarIds),
       }
-    }).
-    success(function successCallback(data) {
+    }).then(function successCallback(data) {
       _this.timeStep = "week";
       // round(... * 100) / 100 necessary to round average hours to two decimal
       _this.averageHours = Math.round(((_this.tagHours / data[0].length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
-    });
+      }, function errorCallback(data) {
+        throw "Could not get weekly timeseries";
+      });
   };
 
   this.showMonthly = function() {
@@ -150,13 +154,14 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
         timezone: query_timezone,
         calendar_ids: JSON.stringify(calendarIds),
       }
-    }).
-    success(function successCallback(data) {
+    }).then(function successCallback(data) {
       _this.timeStep = "month";
       _this.averageHours = Math.round(((_this.tagHours / data[0].length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
+    }, function errorCallback() {
+      throw "Could not get monthly timeseries";
     });
   };
 
@@ -177,8 +182,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
         page: pageNum,
         calendar_ids: JSON.stringify(calendarIds)
       }
-    }).
-    success(function successCallback(data) {
+    }).then(function successCallback(data) {
       _this.tagEvents = [];
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
@@ -205,8 +209,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
       params: {
         calendar_ids: JSON.stringify(calendarIds),
       }
-    }).
-    success(function successCallback(data) {
+    }).then(function successCallback(data) {
       _this.tagHours = data.hours;
       if (_this.timeStep === "day") {
         _this.showDaily();
