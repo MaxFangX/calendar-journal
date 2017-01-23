@@ -10,7 +10,12 @@ analyticsApp.component('categoryDetails', {
 
 function CategoriesDetailCtrl($scope, $http, QueryService){
   var _this = this;
-  var categoryUrl = '/v1/categories/' + this.categoryId + '/events';
+  this.$onInit = () => {
+    var categoryId = this.categoryId;
+    this.categoryUrl = '/v1/categories/' + categoryId + '/events';
+    this.initialize();
+  }
+  var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
   this.pageEvents = [];
   this.dailyData = [];
@@ -62,6 +67,8 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
       _this.ctrlGraphData = data[0];
       _this.showGraph(data[1]);
       _this.dailyData = data;
+    }, function errorCallback() {
+      throw "Failed to get timeseries day";
     });
   };
 
@@ -95,20 +102,20 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.getEvents = function(pageNum) {
     $http({
       method: 'GET',
-      url: categoryUrl + '.json',
+      url: this.categoryUrl + '.json',
       params: {
         page:pageNum
       }
     }).
-    success(function successCallback(data) {
-      for (var i = 0; i < data.results.length; i++) {
-        var event = data.results[i];
+    then(function successCallback(response) {
+      for (var i = 0; i < response.data.results.length; i++) {
+        var event = response.data.results[i];
         _this.categoryEvents.unshift({
           start: (new Date(event.start)).toString(),
           name: event.name,
         });
       }
-      if (data.next !== null) {
+      if (response.data.next !== null) {
         pageNum += 1;
         _this.getEvents(pageNum);
       } else {
@@ -116,6 +123,8 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
         _this.showPageEvents();
         _this.categoryEvents.dataLoaded = true;
       }
+    }, function errorCallback() {
+      throw "Failed to get events";
     });
   };
 
@@ -123,6 +132,4 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     this.showDaily();
     this.getEvents(1);
   }.bind(this);
-
-  this.initialize();
 }

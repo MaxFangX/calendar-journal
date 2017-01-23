@@ -8,9 +8,13 @@ analyticsApp.component('tagDetails', {
 
 function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, QueryService) {
   var _this = this;
-  var tagUrl = '/v1/tags/' + this.tagId;
-  var tagEvent = '/v1/tags/' + this.tagId + '/events';
-  var categoryTags = '/v1/tags/' + this.tagId + '/by-category';
+  this.$onInit = () => {
+    var tagId = this.tagId;
+    this.tagUrl = '/v1/tags/' + tagId;
+    this.tagEvent = '/v1/tags/' + tagId + '/events';
+    this.categoryTags = '/v1/tags/' + tagId + '/by-category';
+  }
+  var query_timezone = moment.tz.guess();
   this.tagHours = 0;
   this.tagEvents = [];
   this.pageEvents = [];
@@ -84,11 +88,11 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   this.showTagsByCategories = function() {
     $http({
       method: 'GET',
-      url: categoryTags + '.json',
-    }).success(function successCallback(data) {
+      url: this.categoryTags + '.json',
+    }).then(function successCallback(response) {
       _this.tagsByCategoriesData = [];
-      for (var i = 0; i < data.length; i++) {
-        var category = data[i];
+      for (var i = 0; i < response.data.length; i++) {
+        var category = response.data[i];
         _this.tagsByCategoriesData.push({
           label: category[0],
           color: category[1],
@@ -96,6 +100,8 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
         });
       }
       _this.showCategoryPie();
+    }, function errorCallback() {
+      console.log("Failed to get tags by categories")
     });
   };
 
@@ -145,22 +151,21 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     var filterData = CalendarFilterService.getFilter();
     $http({
       method: 'GET',
-      url: tagEvent + '.json',
+      url: this.tagEvent + '.json',
       params: {
         page: pageNum,
         calendar_ids: JSON.stringify(filterData.calendarIds)
       }
-    }).
-    success(function successCallback(data) {
+    }).then(function successCallback(response) {
       _this.tagEvents = [];
-      for (var i = 0; i < data.results.length; i++) {
-        var event = data.results[i];
+      for (var i = 0; i < response.data.results.length; i++) {
+        var event = response.data.results[i];
         _this.tagEvents.unshift({
           start: (new Date(event.start)).toString(),
           name: event.name,
         });
       }
-      if (data.next !== null) {
+      if (response.data.next !== null) {
         pageNum += 1;
         _this.getEvents(pageNum);
       } else {
@@ -175,13 +180,12 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     var filterData = CalendarFilterService.getFilter();
     $http({
       method: 'GET',
-      url: tagUrl + '.json',
+      url: this.tagUrl + '.json',
       params: {
         calendar_ids: JSON.stringify(filterData.calendarIds),
       }
-    }).
-    success(function successCallback(data) {
-      _this.tagHours = data.hours;
+    }).then(function successCallback(response) {
+      _this.tagHours = response.data.hours;
       if (_this.timeStep === "day" || _this.timeStep === "") {
         _this.showDaily();
       }
