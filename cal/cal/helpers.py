@@ -147,6 +147,10 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
         week_hours.append((start, total))
         start = end
 
+    # Account for rollover event to today
+    if rollover:
+        week_hours.append((start, rollover))
+        
     # Take care if not enough data to offset one period
     if moving_average_lst == []:
         moving_average_lst = [(0,0)]
