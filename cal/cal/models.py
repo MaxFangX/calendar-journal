@@ -31,6 +31,7 @@ class Profile(models.Model):
     authed = models.BooleanField(default=False, help_text="If the user's oauth credentials are currently valid")
     private_event_names = models.BooleanField(default=False, help_text="If the user's event names will return as dummy text.")
     analysis_start = models.DateTimeField(null=True, blank=True, help_text="When the analysis of the user's calendar will start")
+    # first_time_authed = models.BooleanField(default=False, help_text="If it's the first time the user's oauth credentials are authenticated")
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -129,6 +130,9 @@ class Profile(models.Model):
             if qs.count() > 0:
                 create_category_if_nonexistent(color_index="1", gcalendar=calendar)
 
+    # def resetFirstTimeAuth(self):
+    #     self.first_time_authed = False
+    #     self.save()
 
 class GCalendar(models.Model):
 
@@ -240,6 +244,7 @@ class GCalendar(models.Model):
                 recurring_event_id=event.get('recurringEventId', ''))
 
     def sync(self, full_sync=False):
+        # if self.summary != "Questbridge" and self.summary != "cinddkaitie@gmail.com":
         result = None
         creds = self.user.googlecredentials
         service = creds.get_service()
