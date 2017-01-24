@@ -109,7 +109,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
 
   this.showDaily = function() {
     var filterData = CalendarFilterService.getFilter();
-    QueryService.populateDay('Tag day ' + filterData.filterKey, 'Tag', _this.tagId, filterData.calendarIds).
+    QueryService.populateDay('Tag day ' + filterData.filterKey + _this.tagId, 'Tag', _this.tagId, filterData.calendarIds).
     then(function populate(data) {
       _this.timeStep = "day";
       // round(... * 100) / 100 necessary to round average hours to two decimal
@@ -122,7 +122,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
 
   this.showWeekly = function() {
     var filterData = CalendarFilterService.getFilter();
-    var data = QueryService.populateData('Tag week ' + filterData.filterKey, 'Tag', _this.tagId, "week", _this.dailyData)
+    var data = QueryService.populateData('Tag week ' + filterData.filterKey + _this.tagId, 'Tag', _this.tagId, "week", _this.dailyData)
     _this.timeStep = "week";
     var numWeeks = data[0][0].values.length
     _this.averageHours = Math.round(((_this.tagHours / numWeeks) * 100)) / 100;
@@ -132,7 +132,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
 
   this.showMonthly = function() {
     var filterData = CalendarFilterService.getFilter();
-    var data = QueryService.populateData('Tag month ' + filterData.filterKey, 'Tag', _this.tagId, "month", _this.dailyData)
+    var data = QueryService.populateData('Tag month ' + filterData.filterKey + _this.tagId, 'Tag', _this.tagId, "month", _this.dailyData)
     _this.timeStep = "month";
     var numMonths = data[0][0].values.length
     _this.averageHours = Math.round(((_this.tagHours / numMonths) * 100)) / 100;
