@@ -3,6 +3,7 @@ analyticsApp.component('categoryDetails', {
   controller: ['$scope', '$http', 'QueryService', CategoriesDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
+    displayName: '@',
     categoryId: '@',
     categoryHours: '@'
   }
@@ -10,11 +11,11 @@ analyticsApp.component('categoryDetails', {
 
 function CategoriesDetailCtrl($scope, $http, QueryService){
   var _this = this;
-  this.$onInit = () => {
+  this.$onInit = function () {
     var categoryId = this.categoryId;
     this.categoryUrl = '/v1/categories/' + categoryId + '/events';
     this.initialize();
-  }
+  };
   var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
   this.pageEvents = [];
