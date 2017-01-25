@@ -264,11 +264,12 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
       return _this.details[filterKey];
     }
 
-    var dailyData = data[0][0].values
+    var dailyData = data.lineGraph[0].values
     var ctrlDetails = [];
 
     // Type line
     var timeStepData = [];
+    // Gets hours of first datapoint
     var start = new Date(dailyData[0].x)
     var offset = 0;
 
@@ -398,7 +399,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
       strokeWidth: 3,
     });
 
-    _this.details[filterKey] = [ctrlDetails, maxYValue + 10];
+    _this.details[filterKey] = {lineGraph: ctrlDetails, maxYValue: maxYValue + 10};
     return _this.details[filterKey];
   }
 
@@ -461,6 +462,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
 
       var trendData = trendLine(xLabels, yLabels);
 
+      // This line should always be pushed on first
       ctrlDetails.push({
         values: events,
         key: type + ' Line',
@@ -483,7 +485,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
           strokeWidth: 3,
         });
       }
-      _this.details[filterKey] = [ctrlDetails, maxYValue];
+      _this.details[filterKey] = {lineGraph: ctrlDetails, maxYValue: maxYValue};
       return _this.details[filterKey];
     });
   };

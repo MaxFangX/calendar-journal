@@ -112,10 +112,10 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     QueryService.populateDay('Tag day ' + filterData.filterKey + _this.tagId, 'Tag', _this.tagId, filterData.calendarIds).
     then(function populate(data) {
       _this.timeStep = "day";
-      // round(... * 100) / 100 necessary to round average hours to two decimal
-      _this.averageHours = Math.round(((_this.tagHours / data[0][0].values.length) * 100)) / 100;
-      _this.ctrlGraphData = data[0];
-      _this.showGraph(data[1]);
+      var numDays = data.lineGraph[0].values.length
+      _this.averageHours = Math.round(((_this.tagHours / numDays) * 100)) / 100;
+      _this.ctrlGraphData = data.lineGraph;
+      _this.showGraph(data.maxYValue);
       _this.dailyData = data;
     })
   };
@@ -124,20 +124,20 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     var filterData = CalendarFilterService.getFilter();
     var data = QueryService.populateData('Tag week ' + filterData.filterKey + _this.tagId, 'Tag', _this.tagId, "week", _this.dailyData)
     _this.timeStep = "week";
-    var numWeeks = data[0][0].values.length
+    var numWeeks = data.lineGraph[0].values.length
     _this.averageHours = Math.round(((_this.tagHours / numWeeks) * 100)) / 100;
-    _this.ctrlGraphData = data[0];
-    _this.showGraph(data[1]);
+    _this.ctrlGraphData = data.lineGraph;
+    _this.showGraph(data.maxYValue);
   };
 
   this.showMonthly = function() {
     var filterData = CalendarFilterService.getFilter();
     var data = QueryService.populateData('Tag month ' + filterData.filterKey + _this.tagId, 'Tag', _this.tagId, "month", _this.dailyData)
     _this.timeStep = "month";
-    var numMonths = data[0][0].values.length
+    var numMonths = data.lineGraph[0].values.length
     _this.averageHours = Math.round(((_this.tagHours / numMonths) * 100)) / 100;
-    _this.ctrlGraphData = data[0];
-    _this.showGraph(data[1]);
+    _this.ctrlGraphData = data.lineGraph;
+    _this.showGraph(data.maxYValue);
   };
 
   this.showPageEvents = function() {

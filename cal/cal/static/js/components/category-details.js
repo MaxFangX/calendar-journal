@@ -64,9 +64,10 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     QueryService.populateDay('Category day' + _this.categoryId, 'Category', _this.categoryId, []).
     then(function populate(data) {
       _this.timeStep = "day";
-      _this.averageHours = Math.round(((_this.categoryHours / data[0][0].values.length) * 100)) / 100;
-      _this.ctrlGraphData = data[0];
-      _this.showGraph(data[1]);
+      var numDays = data.lineGraph[0].values.length;
+      _this.averageHours = Math.round(((_this.categoryHours / numDays) * 100)) / 100;
+      _this.ctrlGraphData = data.lineGraph;
+      _this.showGraph(data.maxYValue);
       _this.dailyData = data;
     }, function errorCallback() {
       throw "Failed to get timeseries day";
@@ -76,19 +77,19 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.showWeekly = function() {
     var data = QueryService.populateData('Category week' + _this.categoryId, 'Category', _this.categoryId, "week", _this.dailyData);
     _this.timeStep = "week";
-    var numWeeks = data[0][0].values.length;
+    var numWeeks = data.lineGraph[0].values.length;
     _this.averageHours = Math.round(((_this.categoryHours / numWeeks) * 100)) / 100;
-    _this.ctrlGraphData = data[0];
-    _this.showGraph(data[1]);
+    _this.ctrlGraphData = data.lineGraph;
+    _this.showGraph(data.maxYValue);
   };
 
   this.showMonthly = function() {
     var data = QueryService.populateData('Category month' + _this.categoryId, 'Category', _this.categoryId, "month", _this.dailyData);
    _this.timeStep = "month";
-   var numMonths = data[0][0].values.length;
+   var numMonths = data.lineGraph[0].values.length;
    _this.averageHours = Math.round(((_this.categoryHours / numMonths) * 100)) / 100;
-   _this.ctrlGraphData = data[0];
-   _this.showGraph(data[1]);
+   _this.ctrlGraphData = data.lineGraph;
+   _this.showGraph(data.maxYValue);
   };
 
   this.showPageEvents = function() {
