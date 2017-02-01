@@ -1,12 +1,12 @@
 analyticsApp.component('calendar', {
-  templateUrl: '/static/templates/calendar.html',
+  templateUrl: '/static/js/components/calendar/calendar.html',
   controller: 'CalendarCtrl'
 });
 
 analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarConfig, CalendarFilterService) {
    this.calendars = {};
    var _this = this;
-   
+
    this.events = function(start, end, timezone, callback) {
      var query_timezone = '';
      if (!timezone) {
