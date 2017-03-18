@@ -738,7 +738,7 @@ class Tag(models.Model, EventCollection):
         keywords = self.keywords.split(',')
 
         for category in categories:
-            if category.calendar and category.calendar.calendar_id in calendar_ids:
+            if category.calendar.calendar_id and category.calendar.calendar_id in calendar_ids:
                 querysets = [
                         GEvent.objects
                         .filter(calendar__user=category.user, calendar=category.calendar,
