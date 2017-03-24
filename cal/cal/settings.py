@@ -42,7 +42,7 @@ GOOGLE_CALENDAR_API_CLIENT_SECRET = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_SEC
 assert GOOGLE_CALENDAR_API_CLIENT_ID, "GOOGLE_CALENDAR_API_CLIENT_ID environment variable must be set"
 assert GOOGLE_CALENDAR_API_CLIENT_SECRET, "GOOGLE_CALENDAR_API_CLIENT_SECRET environment variable must be set"
 
-ALLOWED_HOSTS = ['panalytics.elasticbeanstalk.com', 'localhost', '127.0.0.1', 'ngrok.io']
+ALLOWED_HOSTS = ['panalytics.elasticbeanstalk.com', 'localhost', '127.0.0.1', 'ngrok.io', 'calendarapptest.heroku.com']
 
 AUTHENTICATION_BACKENDS = (
     # Python social auth
@@ -147,7 +147,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     # Vendor processors
     'social.apps.django_app.context_processors.backends',
     'social.apps.django_app.context_processors.login_redirect',  # TODO ensure this is used
-    
+
 ]
 
 WSGI_APPLICATION = 'cal.wsgi.application'
@@ -160,18 +160,22 @@ if 'RDS_DB_NAME' in os.environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT'],
+            'NAME': 'dfe0rrmd4ldfa1',
+            'USER': 'yacnjuojlushro',
+            'PASSWORD': 'c18e92383803272e63b9ec80f9ded9f690c4f314dadecdf3ae7ea03fc0863f1b',
+            'HOST': 'ec2-54-243-185-99.compute-1.amazonaws.com',
+            'PORT': 5432,
         }
     }
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'dfe0rrmd4ldfa1',
+            'USER': 'yacnjuojlushro',
+            'PASSWORD': 'c18e92383803272e63b9ec80f9ded9f690c4f314dadecdf3ae7ea03fc0863f1b',
+            'HOST': 'ec2-54-243-185-99.compute-1.amazonaws.com',
+            'PORT': 5432,
         }
     }
 
@@ -192,9 +196,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 if ENVIRONMENT == 'prod':
-    STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
+    STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+    STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
     STATIC_URL = '/static/'
-    BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "..", "www", "cal", "static/")
+    STATICFILES_DIRS = (
+        os.path.join(PROJECT_ROOT, 'static'),
+    )
+    BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
     STATIC_URL = '/static/'
